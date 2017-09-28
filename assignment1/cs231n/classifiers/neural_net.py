@@ -76,6 +76,14 @@ class TwoLayerNet(object):
     # Store the result in the scores variable, which should be an array of      #
     # shape (N, C).                                                             #
     #############################################################################
+    scores = X.dot(W1)
+    scores += b1
+    scores = np.maximum(0,scores)
+    h = scores
+    scores = scores.dot(W2)
+    scores += b2
+    print (scores.shape)
+    
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
@@ -93,6 +101,14 @@ class TwoLayerNet(object):
     # in the variable loss, which should be a scalar. Use the Softmax           #
     # classifier loss.                                                          #
     #############################################################################
+    scores_sub_max = scores - np.max(scores,axis=1).reshape(-1,1)
+    softmax = np.exp(scores_sub_max)/np.sum(np.exp(scores_sub_max),axis=1).reshape(-1,1)
+    loss = np.log(softmax[range(N),list(y)])
+    loss *= (-1)
+    loss /= N
+    #chain rule
+    loss += 1/2 * reg * (np.sum(W1*W1) + np.sum(W2*W2))
+    
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
@@ -105,6 +121,16 @@ class TwoLayerNet(object):
     # and biases. Store the results in the grads dictionary. For example,       #
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
+    dS = softmax.copy()
+    dS[range(N),list(y)] -= 1
+    dS /= N
+    grads['W2'] = h.T.dot(dS) + reg * W2
+    grads['b2'] = np.sum(dS, axis=0)
+    dH = dS.dot(W2.T)
+    dH = np.maximum(dH,0) * dH
+    grads['W1'] = X.T.dot(dH) + reg * W1
+    grads['b1'] = np.sum(dH, axis=0)
+    
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
@@ -149,6 +175,9 @@ class TwoLayerNet(object):
       # TODO: Create a random minibatch of training data and labels, storing  #
       # them in X_batch and y_batch respectively.                             #
       #########################################################################
+      idx = np.random.choice(num_train, batch_size, replace=True)
+      X_batch = X[idx]
+      y_batch = y[idx]
       pass
       #########################################################################
       #                             END OF YOUR CODE                          #
@@ -164,6 +193,10 @@ class TwoLayerNet(object):
       # using stochastic gradient descent. You'll need to use the gradients   #
       # stored in the grads dictionary defined above.                         #
       #########################################################################
+      self.params['W2'] += (-1) * learning_rate * grads['W2']
+      self.params['b2'] += (-1) * learning_rate * grads['b2']
+      self.params['W1'] += (-1) * learning_rate * grads['W1']
+      self.params['b1'] += (-1) * learning_rate * grads['b1']
       pass
       #########################################################################
       #                             END OF YOUR CODE                          #
@@ -209,6 +242,9 @@ class TwoLayerNet(object):
     ###########################################################################
     # TODO: Implement this function; it should be VERY simple!                #
     ###########################################################################
+    h = np.maximum(0, X.dot(self.params['W1']) + self.params['b1'])
+    scores = h.dot(self.params['W2']) + self.params['b2']
+    y_pred = np.argmax(scores, axis=1)
     pass
     ###########################################################################
     #                              END OF YOUR CODE                           #
