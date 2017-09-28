@@ -81,20 +81,23 @@ def softmax_loss_vectorized(W, X, y, reg):
   score = (X).dot(W) #N*C matrix
   #print (score)
   score_exp = np.exp(score)
-  score_max = np.amax(score_exp,axis=1).reshape(-1,1)
+  #score_max = np.amax(score_exp,axis=1).reshape(-1,1)
   #print (score_max)
-  score_sub_max = score_exp - score_max
-  score_sum = np.sum(score_sub_max,axis=1).reshape(-1,1)
-  softmax = score_sub_max / score_sum
-
-  loss = (-1) * np.sum(np.log(softmax[range(N),list(y)]))
+  score_sum = np.sum(score_exp,axis=1).reshape(-1,1)
+  softmax = score_exp / score_sum
+  #print(np.log(softmax[range(N),list(y)]))
+  #a = np.log(softmax[range(N),list(y)])
+  #print(np.sum(a))
+  loss = ((-1) * np.sum(np.log(softmax[range(N),list(y)])))/N
+  #print (loss)  
   dS=softmax.copy()
-  dS[range(N), list(y)] -= 1
+  dS[range(N), list(y)] -= 1 #target class
+  #print (dS.shape)
   dW = (X.T).dot(dS)
   dW /= N
   dW += reg*W
+  #print (loss)
                         
-  loss /= N
   loss += 1/2*reg*np.sum(W*W)
   
   #pass
