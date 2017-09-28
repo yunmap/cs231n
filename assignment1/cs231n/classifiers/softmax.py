@@ -30,7 +30,27 @@ def softmax_loss_naive(W, X, y, reg):
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
   #############################################################################
-  pass
+  C = W.shape[1]
+  N = X.shape[0]
+
+  for i in range(N) : 
+    score_i = X[i].dot(W)
+    score_set = np.exp(score_i) 
+    score_sum = sum(score_set)
+    #print (score_set[y[i]])
+    a = (-1) * np.log(score_set[y[i]]/score_sum)
+    loss += a
+    #print loss
+    for j in range(C) :
+        softmax = score_set[j]/score_sum
+        if j==y[i] :
+            dW[:,j] += (softmax - 1) * X[i]
+        else :
+            dW[:,j] += softmax * X[i]
+  loss /= N
+  dW /= N
+  dW += reg*W
+    
   #############################################################################
   #                          END OF YOUR CODE                                 #
   #############################################################################
@@ -54,7 +74,8 @@ def softmax_loss_vectorized(W, X, y, reg):
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
   #############################################################################
-  pass
+
+  #pass
   #############################################################################
   #                          END OF YOUR CODE                                 #
   #############################################################################
