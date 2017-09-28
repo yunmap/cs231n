@@ -48,6 +48,7 @@ def softmax_loss_naive(W, X, y, reg):
         else :
             dW[:,j] += softmax * X[i]
   loss /= N
+  loss += 1/2*reg*np.sum(W*W)
   dW /= N
   dW += reg*W
     
@@ -67,13 +68,6 @@ def softmax_loss_vectorized(W, X, y, reg):
   # Initialize the loss and gradient to zero.
   loss = 0.0
   dW = np.zeros_like(W)
-    
-  score = (X).dot(W) #N*C matrix
-  print (score)
-  score_exp = np.exp(score)
-  score_max = np.amax(score_exp,axis=1)
-  score_sum = np.sum(score_exp,axis=1)
-  
   
   #############################################################################
   # TODO: Compute the softmax loss and its gradient using no explicit loops.  #
@@ -81,7 +75,28 @@ def softmax_loss_vectorized(W, X, y, reg):
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
   #############################################################################
+  C = W.shape[1]
+  N = X.shape[0]
 
+  score = (X).dot(W) #N*C matrix
+  #print (score)
+  score_exp = np.exp(score)
+  score_max = np.amax(score_exp,axis=1).reshape(-1,1)
+  #print (score_max)
+  score_sub_max = score_exp - score_max
+  score_sum = np.sum(score_sub_max,axis=1).reshape(-1,1)
+  softmax = score_sub_max / score_sum
+
+  loss = (-1) * np.sum(np.log(softmax[range(N),list(y)]))
+  dS=softmax.copy()
+  dS[range(N), list(y)] -= 1
+  dW = (X.T).dot(dS)
+  dW /= N
+  dW += reg*W
+                        
+  loss /= N
+  loss += 1/2*reg*np.sum(W*W)
+  
   #pass
   #############################################################################
   #                          END OF YOUR CODE                                 #
