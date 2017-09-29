@@ -122,7 +122,7 @@ class TwoLayerNet(object):
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
     dS = softmax.copy()
-    dS[range(N),list(y)] -= 1
+    dS[range(N),list(y)] -= 1 #correct class's gradient
     dS /= N
     grads['W2'] = h.T.dot(dS) + reg * W2
     grads['b2'] = np.sum(dS, axis=0)
