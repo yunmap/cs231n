@@ -107,7 +107,7 @@ class TwoLayerNet(object):
     loss *= (-1)
     loss /= N
     #chain rule
-    loss += reg * ((np.sum(W1*W1) + np.sum(W2*W2)))
+    loss += reg * ((np.sum(W1*W1) + np.sum(W2*W2))) *0.5
     
     pass
     #############################################################################
@@ -123,13 +123,16 @@ class TwoLayerNet(object):
     #############################################################################
     dS = softmax.copy()
     dS[range(N),list(y)] -= 1 #correct class's gradient
-    dS /= N
-    grads['W2'] = h.T.dot(dS) + reg * W2
-    grads['b2'] = np.sum(dS, axis=0)
+
+    grads['W2'] = h.T.dot(dS)/N
     dH = dS.dot(W2.T)
-    dH = np.maximum(dH,0) * dH
-    grads['W1'] = X.T.dot(dH) + reg * W1
-    grads['b1'] = np.sum(dH, axis=0)
+    dh = dS.dot(W2.T)*(a>0)
+    grads['b2'] = np.sum(dS, axis=0)/N
+    dH = dS.dot(W2.T)
+    grads['W1'] = X.T.dot(dh)/N
+    grads['b1'] = np.sum(dh, axis=0)/N
+    grads['W2'] += reg*W2
+    grads['W1'] += reg*W1
     
     pass
     #############################################################################
@@ -175,7 +178,7 @@ class TwoLayerNet(object):
       # TODO: Create a random minibatch of training data and labels, storing  #
       # them in X_batch and y_batch respectively.                             #
       #########################################################################
-      idx = np.random.choice(num_train, batch_size, replace=True)
+      idx = np.random.choice(num_train, batch_size)
       X_batch = X[idx]
       y_batch = y[idx]
       pass
